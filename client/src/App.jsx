@@ -8,6 +8,7 @@ import InventorySummary from "./components/InventorySummary";
 import SellProduct from "./components/SellProduct";
 import SalesHistory from "./components/SalesHistory";
 import SalesChart from "./components/SalesChart";
+import Login from "./components/Login";
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -18,6 +19,24 @@ function App() {
   const [sortOrder, setSortOrder] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 6;
+
+  const [auth, setAuth] = useState(() => {
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    return token && user ? { token, user } : null;
+  });
+
+  const handleAuth = ({ token, user }) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+    setAuth({ token, user });
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setAuth(null);
+  };
 
   const fetchProducts = async () => {
     try {
@@ -38,9 +57,11 @@ function App() {
   };
 
   useEffect(() => {
-    fetchProducts();
-    fetchSales();
-  }, []);
+    if (auth) {
+      fetchProducts();
+      fetchSales();
+    }
+  }, [auth]);
 
   const handleDelete = async (id) => {
     try {
@@ -58,12 +79,10 @@ function App() {
     fetchProducts();
   };
 
-  // Search
   const filtered = products.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Sorting
   const sorted = [...filtered].sort((a, b) => {
     if (!sortField) return 0;
     const aVal = a[sortField];
@@ -73,7 +92,6 @@ function App() {
     return 0;
   });
 
-  // Pagination
   const indexOfLast = currentPage * productsPerPage;
   const indexOfFirst = indexOfLast - productsPerPage;
   const currentProducts = sorted.slice(indexOfFirst, indexOfLast);
@@ -82,12 +100,32 @@ function App() {
   const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
   const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
 
+  if (!auth) {
+    return <Login onAuth={handleAuth} />;
+  }
+
   return (
-    <div className="App p-5">
-      <h1 className="text-3xl font-bold mb-6">Inventory Management</h1>
+    <div className="App container mx-auto p-5">
+      {/* Header with Logout */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">
+          Inventory Management
+        </h1>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-600">
+            Signed in as <strong>{auth.user.name}</strong>
+          </span>
+          <button
+            onClick={logout}
+            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
 
+      {/* Summary and Sales UI */}
       <InventorySummary products={products} sales={sales} />
-
       <SellProduct
         products={products}
         onSale={() => {
@@ -99,18 +137,11 @@ function App() {
       <SalesChart />
       <SalesHistory />
 
-      {editingProduct ? (
-        <EditProduct
-          product={editingProduct}
-          onUpdate={completeEdit}
-          onCancel={cancelEdit}
-        />
-      ) : (
-        <AddProduct onAdd={fetchProducts} />
-      )}
+      {/* Add Product */}
+      <AddProduct onAdd={fetchProducts} />
 
       {/* Search + Sort */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 my-6">
         <input
           type="text"
           placeholder="Search products..."
@@ -143,13 +174,31 @@ function App() {
         </div>
       </div>
 
+      {/* Product List */}
       <ProductList
         products={currentProducts}
         onDelete={handleDelete}
         onEdit={startEdit}
       />
 
-      {/* Tailwind Pagination */}
+      {/* ✨ Slide-Down Edit Panel */}
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          editingProduct ? "max-h-screen" : "max-h-0"
+        }`}
+      >
+        {editingProduct && (
+          <div className="bg-white border border-gray-200 rounded-lg p-4 my-6 shadow-md">
+            <EditProduct
+              product={editingProduct}
+              onUpdate={completeEdit}
+              onCancel={cancelEdit}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Pagination */}
       <div className="flex items-center justify-center space-x-2 mt-8">
         <button
           onClick={handlePrev}

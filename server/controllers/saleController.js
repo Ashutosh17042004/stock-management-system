@@ -11,6 +11,13 @@ export const recordSale = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
+    // Check if product belongs to user
+    if (product.userId.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to sell this product" });
+    }
+
     // Check stock
     if (product.quantity < quantity) {
       return res.status(400).json({ message: "Insufficient stock" });
@@ -26,9 +33,10 @@ export const recordSale = async (req, res) => {
     // Create sale record
     const sale = await Sale.create({
       product: productId,
+      userId: req.user.id,
       quantity,
       sellPrice: product.sellPrice,
-      totalAmount
+      totalAmount,
     });
 
     res.status(201).json(sale);
@@ -37,14 +45,13 @@ export const recordSale = async (req, res) => {
   }
 };
 
-
 export const getSalesHistory = async (req, res) => {
   try {
     // Read query params for date range
     const { startDate, endDate } = req.query;
 
     // Build a filter object
-    let filter = {};
+    let filter = { userId: req.user.id };
 
     if (startDate && endDate) {
       // Convert query strings to proper Date objects
@@ -56,7 +63,7 @@ export const getSalesHistory = async (req, res) => {
 
       filter.soldAt = {
         $gte: start,
-        $lte: end
+        $lte: end,
       };
     }
 
@@ -64,6 +71,8 @@ export const getSalesHistory = async (req, res) => {
     return res.status(200).json(sales);
   } catch (error) {
     console.error("Sales history fetch error:", error.message);
-    return res.status(500).json({ message: "Failed to fetch sales history", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Failed to fetch sales history", error: error.message });
   }
 };

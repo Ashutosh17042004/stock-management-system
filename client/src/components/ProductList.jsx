@@ -1,7 +1,6 @@
 function ProductList({ products, onDelete, onEdit }) {
   return (
     <div className="mb-8">
-
       {/* Section Header */}
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">
         Product List
@@ -21,10 +20,16 @@ function ProductList({ products, onDelete, onEdit }) {
                 {p.name}
               </h3>
               <p className="text-sm text-gray-600">
-                Buy: <span className="font-semibold">₹{p.buyPrice.toLocaleString()}</span>
+                Buy:{" "}
+                <span className="font-semibold">
+                  ₹{p.buyPrice.toLocaleString()}
+                </span>
               </p>
               <p className="text-sm text-gray-600">
-                Sell: <span className="font-semibold">₹{p.sellPrice.toLocaleString()}</span>
+                Sell:{" "}
+                <span className="font-semibold">
+                  ₹{p.sellPrice.toLocaleString()}
+                </span>
               </p>
               <p className="text-sm text-gray-600 mb-4">
                 Quantity: <span className="font-semibold">{p.quantity}</span>
