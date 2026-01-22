@@ -17,7 +17,7 @@ function App() {
   const [sortField, setSortField] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 5;
+  const productsPerPage = 6;
 
   const fetchProducts = async () => {
     try {
