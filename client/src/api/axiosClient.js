@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: "stock-management-system-three-beta.vercel.app", // backend base URL
+  baseURL: "http://localhost:5000/api", // backend base URL
 });
 
 // Attach token automatically if present
