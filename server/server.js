@@ -5,7 +5,6 @@ import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import saleRoutes from "./routes/saleRoutes.js";
-import serverless from "serverless-http";
 
 dotenv.config();
 
@@ -29,13 +28,8 @@ app.get("/", (req, res) => {
   res.send("Inventory API Running");
 });
 
-// If running on Vercel, export the serverless handler
-export const handler = serverless(app);
-
-// Start the server locally when not running in serverless environment
-if (!process.env.VERCEL) {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
-}
+// Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
