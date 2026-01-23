@@ -19,9 +19,9 @@ app.use(cors());
 app.use(express.json()); // to read JSON bodies
 
 // Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/sales", saleRoutes);
+app.use("/auth", authRoutes);
+app.use("/products", productRoutes);
+app.use("/sales", saleRoutes);
 
 // Test root route
 app.get("/", (req, res) => {
